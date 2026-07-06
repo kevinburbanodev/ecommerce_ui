@@ -2,8 +2,8 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Product } from '@/features/products/types/product.types'
 import { ProductDetailActions } from '@/features/products/components/ProductDetailActions'
+import { useProduct } from '@/features/products/hooks/useProduct'
 import { useLanguage } from '@/shared/i18n/language.context'
 import { formatCurrency } from '@/shared/lib/format'
 
@@ -12,14 +12,48 @@ function starGlyphs(rate: number): string {
   return '★'.repeat(full) + '☆'.repeat(5 - full)
 }
 
-export function ProductDetailView({ product }: { product: Product }) {
+export function ProductDetailView({ id }: { id: number }) {
   const { t } = useLanguage()
+  const { product, isLoading, isError, isNotFound, refetch } = useProduct(id)
+
+  const backLink = (
+    <Link href="/" className="mb-[26px] inline-flex items-center gap-1.5 font-heading text-sm font-medium text-text-mid transition-colors hover:text-text-hi">
+      <span className="text-base leading-none">←</span> {t.backToShop}
+    </Link>
+  )
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-7 sm:px-6">
+        {backLink}
+        <p className="py-20 text-center font-mono text-sm text-text-lo">{t.loadingProducts}</p>
+      </div>
+    )
+  }
+
+  if (isNotFound || isError || !product) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-7 sm:px-6">
+        {backLink}
+        <div className="flex flex-col items-center gap-3 py-20 text-center">
+          <p className="font-mono text-sm text-text-lo">{isNotFound ? t.productNotFound : t.loadError}</p>
+          {isError && (
+            <button
+              type="button"
+              onClick={refetch}
+              className="rounded-xl bg-accent px-5 py-2.5 font-heading text-sm font-semibold text-accent-text hover:bg-accent-hover"
+            >
+              {t.retry}
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-7 sm:px-6">
-      <Link href="/" className="mb-[26px] inline-flex items-center gap-1.5 font-heading text-sm font-medium text-text-mid transition-colors hover:text-text-hi">
-        <span className="text-base leading-none">←</span> {t.backToShop}
-      </Link>
+      {backLink}
       <div className="flex flex-wrap gap-12">
         <div className="min-w-[300px] flex-1 basis-[380px]">
           <div className="relative flex aspect-square items-center justify-center rounded-[20px] border border-border bg-white">

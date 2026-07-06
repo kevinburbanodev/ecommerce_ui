@@ -17,7 +17,7 @@ An e-commerce storefront UI built with Next.js, TypeScript, and the FakeStore AP
 
 Next.js (App Router) + TypeScript + Tailwind CSS v4 + React Hook Form + Zod, organized feature-first (`src/features/<name>/{api,components,store,types,schema}`, shared code in `src/shared/`).
 
-No API key is required — the [FakeStore API](https://fakestoreapi.com/) is public and used directly. Product data is cached by Next.js for an hour (`next: { revalidate: 3600 }`) on the server-rendered routes.
+No API key is required — the [FakeStore API](https://fakestoreapi.com/) is public and used directly, fetched client-side (in the browser) rather than from Next.js Server Components. FakeStore's bot protection blocks requests from cloud/datacenter IPs — including Vercel's own build machines and serverless functions — so server-side fetching 403s in production even though it works locally. See [CLAUDE.md](CLAUDE.md) for details.
 
 ## Getting started
 
@@ -39,7 +39,7 @@ npm run dev
 src/
   app/                # routes: / (grid), /product/[id], /cart, /checkout
   features/
-    products/          # FakeStore API client, product grid/detail components
+    products/          # FakeStore API client, client-side fetch hooks, grid/detail components
     cart/               # localStorage-backed cart context + toast trigger
     checkout/           # Zod schema + React Hook Form checkout form
   shared/

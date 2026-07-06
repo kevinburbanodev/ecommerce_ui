@@ -15,7 +15,7 @@ Type checking is part of `build` and is the only automated correctness check —
 
 ## Environment
 
-No API key is required — the [FakeStore API](https://fakestoreapi.com/) (`https://fakestoreapi.com`) is called directly from Server Components. Its base URL is hardcoded in `src/features/products/api/products.api.ts` since there's no need to swap providers.
+No API key is required — the [FakeStore API](https://fakestoreapi.com/) (`https://fakestoreapi.com`) is called directly from the browser (see "Data fetching" below for why not from the server). Its base URL is hardcoded in `src/features/products/api/products.api.ts` since there's no need to swap providers.
 
 ## Architecture
 
@@ -27,12 +27,13 @@ Code is organized by feature slice, not file type. `src/app/` holds only route f
 
 Three features: `products` (FakeStore API client, grid/detail/rating components), `cart` (localStorage-backed context + toast trigger, no API calls), `checkout` (Zod schema + form, no API calls — the submit handler is fully client-side).
 
-### Data fetching: Server Components fetch, Client Components render + mutate
+### Data fetching happens in the browser, not on the server — deliberately
 
-- `src/features/products/api/products.api.ts` is the only place `fetch` is called. Each function (`getProducts`, `getProduct`, `getCategories`) hits FakeStore directly and uses `next: { revalidate: 3600 }` so Next.js caches the response for an hour instead of refetching on every request.
-- The home page (`src/app/page.tsx`) and product detail page (`src/app/product/[id]/page.tsx`) are `async` Server Components that call the API layer directly and pass plain data down as props — no client-side data fetching or loading states are needed for product data.
-- Route `params` are promises (current Next.js convention) — always `await params` before using dynamic segment values.
-- Because nearly every visible string needs the active theme/language from React context, the *entire* rendered view for a fetched entity is a `'use client'` component (`ProductBrowser` for the grid, `ProductDetailView` for a single product) that receives the Server-Component-fetched data as a plain prop. The route file stays a thin Server Component that only fetches and hands off — don't move the `fetch` calls into the client components.
+`src/features/products/api/products.api.ts` is the only place `fetch` is called, from two client hooks: `useProducts()` (grid + categories) and `useProduct(id)` (detail page), both in `src/features/products/hooks/`. Route files (`src/app/page.tsx`, `src/app/product/[id]/page.tsx`) are thin — the product detail route just unwraps the async `params` promise and hands the numeric `id` to `<ProductDetailView id={...} />`, which fetches client-side.
+
+**This was not the original design and the switch matters:** these routes originally fetched in `async` Server Components, which is the normal/preferred Next.js pattern. In production on Vercel, every request 403'd — FakeStore's bot protection blocks Vercel's build machines *and* its serverless function IPs (confirmed via `vercel_get_runtime_errors`), but allows ordinary browser traffic, which is also the API's intended usage (it's built for client-side practice). If you're tempted to "fix" this by moving `fetch` back into a Server Component for cleaner data flow or SEO, don't — it will build fine locally and 403 in production. `next.config.ts` also sets `images.unoptimized = true` for the same reason: `next/image`'s optimizer proxies image fetches through the server too.
+
+Each hook owns a `status: 'idle' | 'loading' | 'success' | 'error'` (plus `'not-found'` for `useProduct`) and exposes `refetch()` for a manual retry button — `ProductBrowser` and `ProductDetailView` render loading/error states directly rather than relying on `loading.tsx`/`error.tsx` (those still exist as a last-resort safety net for anything unexpected, e.g. a corrupted route).
 
 ### Cart: a single localStorage-backed context, not per-page state
 
@@ -62,4 +63,4 @@ This UI was implemented from a Claude Design handoff (a static HTML/CSS mockup e
 
 ### Routing
 
-Four routes: `/` (product grid), `/product/[id]` (detail), `/cart`, `/checkout`. `/product/[id]` is server-rendered on demand (no `generateStaticParams`); the other three are statically prerendered.
+Four routes: `/` (product grid), `/product/[id]` (detail), `/cart`, `/checkout`. All four are statically prerendered at build time — none of them fetch product data server-side (see above), so there's nothing build-time data to go stale. `/product/[id]` shows as dynamic (ƒ) in the build output only because it has a dynamic route segment, not because it fetches anything.

@@ -6,6 +6,10 @@ export interface Dictionary {
   heroSub: string
   searchPlaceholder: string
   noResults: string
+  loadingProducts: string
+  loadError: string
+  retry: string
+  productNotFound: string
   shop: string
   cart: string
   backToShop: string
@@ -83,6 +87,10 @@ const en: Dictionary = {
   heroSub: 'Clothing, jewelery and electronics — shipped free.',
   searchPlaceholder: 'Search products',
   noResults: 'No products match your search.',
+  loadingProducts: 'Loading products…',
+  loadError: "Couldn't load products from the store right now.",
+  retry: 'Retry',
+  productNotFound: "This product couldn't be found.",
   shop: 'Shop',
   cart: 'Cart',
   backToShop: 'Back to shop',
@@ -165,6 +173,10 @@ const es: Dictionary = {
   heroSub: 'Ropa, joyería y electrónica — envío gratis.',
   searchPlaceholder: 'Buscar productos',
   noResults: 'Ningún producto coincide con tu búsqueda.',
+  loadingProducts: 'Cargando productos…',
+  loadError: 'No se pudieron cargar los productos de la tienda en este momento.',
+  retry: 'Reintentar',
+  productNotFound: 'No se encontró este producto.',
   shop: 'Tienda',
   cart: 'Carrito',
   backToShop: 'Volver a la tienda',
