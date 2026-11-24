@@ -1,55 +1,33 @@
-import type { Metadata } from "next";
-import { Space_Grotesk, Hanken_Grotesk, Space_Mono } from "next/font/google";
-import "./globals.css";
-import { CartProvider } from "@/features/cart/store/cart.context";
-import { LanguageProvider } from "@/shared/i18n/language.context";
-import { Header } from "@/shared/components/Header";
-import { Footer } from "@/shared/components/Footer";
-import { Toast } from "@/shared/components/Toast";
+import type { Metadata } from 'next'
+import { Encode_Sans, Shantell_Sans } from 'next/font/google'
+import './globals.css'
+import { EnvelopeProvider } from '@/features/envelope/envelope.context'
+import { LanguageProvider } from '@/shared/i18n/language.context'
+import { Header } from '@/shared/components/Header'
+import { Footer } from '@/shared/components/Footer'
+import { Toast } from '@/shared/components/Toast'
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-
-const hankenGrotesk = Hanken_Grotesk({
-  variable: "--font-hanken-grotesk",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const spaceMono = Space_Mono({
-  variable: "--font-space-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+const encode = Encode_Sans({ variable: '--font-encode', subsets: ['latin'], axes: ['wdth'] })
+const hand = Shantell_Sans({ variable: '--font-hand', subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Shopfront",
-  description: "A storefront demo built with Next.js, TypeScript, and the FakeStore API.",
-};
+  title: 'Café Remite: café de origen por correo (demo)',
+  description: 'Demo de tienda en línea: seis cafés de Colombia, cada uno con su estampilla, molidos para tu cafetera.',
+}
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="es"
-      className={`${spaceGrotesk.variable} ${hankenGrotesk.variable} ${spaceMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col font-sans">
+    <html lang="es" className={`${encode.variable} ${hand.variable}`}>
+      <body>
         <LanguageProvider>
-          <CartProvider>
+          <EnvelopeProvider>
             <Header />
-            <main className="flex-1">{children}</main>
+            <main>{children}</main>
             <Footer />
             <Toast />
-          </CartProvider>
+          </EnvelopeProvider>
         </LanguageProvider>
       </body>
     </html>
-  );
+  )
 }
