@@ -1,7 +1,5 @@
-'use client'
-
-import { CheckoutForm } from '@/features/checkout/components/CheckoutForm'
+import { AddressForm } from '@/features/checkout/components/AddressForm'
 
 export default function CheckoutPage() {
-  return <CheckoutForm />
+  return <AddressForm />
 }

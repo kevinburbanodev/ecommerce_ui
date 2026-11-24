@@ -1,20 +1,26 @@
 'use client'
 
-import { useCart } from '@/features/cart/store/cart.context'
+import Link from 'next/link'
+import { Envelope } from '@/features/envelope/components/Envelope'
+import { useEnvelope } from '@/features/envelope/envelope.context'
+import { stampsFor } from '@/features/envelope/stamps'
 import { useLanguage } from '@/shared/i18n/language.context'
 
+/** The envelope slides in and the new stamp lands on it. Keyed by the add counter; no timers. */
 export function Toast() {
-  const { toastNonce } = useCart()
+  const { last, lines, count } = useEnvelope()
   const { t } = useLanguage()
 
-  if (toastNonce === 0) return null
-
   return (
-    <div
-      key={toastNonce}
-      className="animate-toast-lifecycle pointer-events-none fixed bottom-7 left-1/2 z-[100] flex items-center gap-2.5 rounded-xl bg-accent px-6 py-3.5 font-heading text-sm font-medium text-accent-text opacity-0 shadow-[0_12px_30px_rgba(0,0,0,.35)]"
-    >
-      <span className="text-[15px] text-[#1f9b5e]">✓</span> {t.addedToCart}
+    <div role="status">
+      {last && count > 0 && (
+        <div key={last.nonce} className="toast">
+          <Envelope stamps={stampsFor(lines)} placeholder={t.hint} sender={t.sender} landing />
+          <p>
+            {t.stuck(last.coffee.region)} <Link href="/cart">{t.seeEnvelope}</Link>
+          </p>
+        </div>
+      )}
     </div>
   )
 }
